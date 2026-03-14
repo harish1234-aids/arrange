@@ -1,23 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sequence Sorter</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='arrange.css') }}">
 </head>
 <body>
-    <div class="card">
-        <h1 style="color: #073b4c;">Sequence Sorter</h1>
-        <div id="game-area">
-            <p>Drag the cards to put the numbers in the correct order!</p>
-            <div id="display" class="sequence-container"></div>
-            <h2 id="msg"></h2>
-        </div>
-        <div id="restart-screen" style="display: none;">
-            <h2>🏆 Mission Complete!</h2>
-            <button onclick="restartGame()">Play Again</button>
-        </div>
-        <br><a href="/admin" style="color:#aaa; font-size:0.8rem; text-decoration:none;">Admin Dashboard</a>
+<div class="card">
+    <h1 style="color: #073b4c; margin-top: 0; text-align: center;">Sequence Sorter</h1>
+    
+    <div id="game-area">
+        <p style="color: #666; text-align: center;">Drag the cards to the correct order!</p>
+        <div id="display" class="sequence-container"></div>
+        <h2 id="msg" style="min-height: 1.5em; text-align: center;"></h2>
     </div>
+
+    <div id="restart-screen" style="display: none; text-align: center;">
+        <h2>🏆 Mission Complete!</h2>
+        <button onclick="restartGame()">Play Again</button>
+    </div>
+
+    <footer style="margin-top: 20px; width: 100%; text-align: center;">
+        <a href="/admin" style="color:#aaa; font-size:0.8rem; text-decoration:none;">Admin Dashboard</a>
+    </footer>
+</div>
     <script src="{{ url_for('static', filename='arrange.js') }}"></script>
 </body>
 </html>

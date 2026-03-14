@@ -20,9 +20,11 @@ function playSound(type) {
 }
 
 async function initGame() {
-    const res = await fetch('/api/sequences');
-    allSequences = await res.json();
-    restartGame();
+    try {
+        const res = await fetch('/api/sequences');
+        allSequences = await res.json();
+        restartGame();
+    } catch (e) { console.error("Failed to load sequences"); }
 }
 
 function restartGame() {
@@ -51,30 +53,63 @@ function renderCards(numbers) {
     numbers.forEach(num => {
         const div = document.createElement('div');
         div.className = "number-card";
-        div.draggable = true;
         div.innerText = num;
-        
+        div.draggable = true;
+
+        // --- Mouse Events ---
         div.addEventListener('dragstart', () => div.classList.add('dragging'));
         div.addEventListener('dragend', () => {
             div.classList.remove('dragging');
             checkOrder();
         });
+
+        // --- Touch Events (Mobile Support) ---
+        div.addEventListener('touchstart', (e) => {
+            div.classList.add('dragging');
+        }, {passive: true});
+
+        div.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const afterElement = getDragAfterElement(container, touch.clientX, touch.clientY);
+            const dragging = document.querySelector('.dragging');
+            if (afterElement == null) container.appendChild(dragging);
+            else container.insertBefore(dragging, afterElement);
+        }, {passive: false});
+
+        div.addEventListener('touchend', () => {
+            div.classList.remove('dragging');
+            checkOrder();
+        });
+
         container.appendChild(div);
     });
 
+    // Mouse DragOver Logic
     container.addEventListener('dragover', e => {
         e.preventDefault();
         const dragging = document.querySelector('.dragging');
-        const afterElement = [...container.querySelectorAll('.number-card:not(.dragging)')].reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
-            const offset = e.clientX - box.left - box.width / 2;
-            if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
-            else return closest;
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
-
+        const afterElement = getDragAfterElement(container, e.clientX, e.clientY);
         if (afterElement == null) container.appendChild(dragging);
         else container.insertBefore(dragging, afterElement);
     });
+}
+
+function getDragAfterElement(container, x, y) {
+    const draggableElements = [...container.querySelectorAll('.number-card:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        // Check both X and Y for mobile wrapping support
+        const offset = x - box.left - box.width / 2;
+        const yOffset = y - box.top - box.height / 2;
+        
+        if (Math.abs(yOffset) < 40 && offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 function checkOrder() {
@@ -83,6 +118,8 @@ function checkOrder() {
         playSound('success');
         document.getElementById('msg').innerText = "🌟 Perfectly Sorted!";
         document.querySelectorAll('.number-card').forEach(el => el.classList.add('correct'));
+        // Disable dragging once correct
+        document.querySelectorAll('.number-card').forEach(el => el.draggable = false);
         setTimeout(nextQuestion, 2000);
     }
 }

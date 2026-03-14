@@ -1,61 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Sorter Manager</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='arrange.css') }}">
     <style>
-        .admin-form-box {
-            background: #f0f0f0; 
-            padding: 20px; 
-            border-radius: 12px; 
-            margin-bottom: 30px;
-            border: 2px solid #ddd;
+        body { font-family: 'Comic Sans MS', sans-serif; background: #fdf6e3; text-align: center; padding: 15px; margin: 0; }
+        .card { 
+            background: white; padding: 1.5rem; border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 95%; max-width: 850px; 
+            border: 4px solid #ffd166; margin: 20px auto; box-sizing: border-box;
         }
-        .admin-form-box input {
-            display: block;
-            width: 90%;
-            margin: 10px auto;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        .btn-row {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background: #fff;
-        }
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-        .action-btn {
-            padding: 5px 12px;
-            font-size: 0.9rem;
-            margin: 2px;
+        .admin-form-box { background: #f9f9f9; padding: 20px; border-radius: 12px; border: 2px dashed #ddd; margin-bottom: 25px; }
+        input { display: block; width: 100%; max-width: 400px; margin: 10px auto; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+        .btn-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        button { padding: 12px 20px; border-radius: 10px; border: none; color: white; font-weight: bold; cursor: pointer; }
+        
+        /* Responsive Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+        th { background: #073b4c; color: white; padding: 12px; }
+        td { padding: 12px; border-bottom: 1px solid #ddd; }
+
+        @media (max-width: 600px) {
+            thead { display: none; }
+            tr { display: block; border: 2px solid #eee; margin-bottom: 10px; border-radius: 10px; padding: 10px; background: #fff; }
+            td { display: block; text-align: right; position: relative; padding-left: 50%; border-bottom: 1px solid #f1f1f1; }
+            td::before { content: attr(data-label); position: absolute; left: 10px; font-weight: bold; color: #073b4c; }
         }
     </style>
 </head>
 <body>
-    <div class="card" style="max-width: 850px;">
+    <div class="card">
         <h1 style="color: #073b4c;">Admin Dashboard</h1>
         
         <div class="admin-form-box">
             <h3 id="form-title">Add New Sequence</h3>
-            <input type="number" id="id" placeholder="Level ID (e.g. 1)">
-            <input type="text" id="pattern" placeholder="Goal Sequence (e.g. 2, 4, 6, 8)">
-            
-            <input type="text" id="scrambled" placeholder="Initial Scramble (e.g. 6, 2, 8, 4)">
+            <input type="number" id="id" placeholder="Level ID">
+            <input type="text" id="pattern" placeholder="Goal (e.g. 2, 4, 6, 8)">
+            <input type="text" id="scrambled" placeholder="Scramble (e.g. 6, 2, 8, 4)">
             
             <div class="btn-row">
-                <button id="save-btn" onclick="save()" style="background: #06d6a0;">Save Sequence</button>
+                <button id="save-btn" onclick="save()" style="background: #06d6a0;">Save</button>
                 <button type="button" onclick="autoScramble()" style="background: #118ab2;">Magic Scramble</button>
                 <button id="cancel-btn" onclick="resetForm()" style="display:none; background: #999;">Cancel</button>
             </div>
@@ -65,29 +50,23 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Goal (Pattern)</th>
-                    <th>Starting Order</th>
+                    <th>Goal</th>
+                    <th>Scramble</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="table-body">
-                </tbody>
+            <tbody id="table-body"></tbody>
         </table>
         
-        <br>
-        <a href="/" style="text-decoration: none; color: #118ab2; font-weight: bold;">← Back to Game</a>
+        <br><a href="/" style="text-decoration: none; color: #118ab2; font-weight: bold;">← Back to Game</a>
     </div>
 
     <script>
         let isEdit = false;
 
-        // Automatically shuffle the goal pattern if the admin wants help
         function autoScramble() {
             const patternInput = document.getElementById('pattern').value;
-            if (!patternInput) {
-                alert("Please enter a Goal Sequence first!");
-                return;
-            }
+            if (!patternInput) return alert("Enter Goal first!");
             const arr = patternInput.split(',').map(n => n.trim());
             const shuffled = [...arr].sort(() => Math.random() - 0.5);
             document.getElementById('scrambled').value = shuffled.join(', ');
@@ -99,12 +78,12 @@
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = data.map(s => `
                 <tr>
-                    <td>${s.id}</td>
-                    <td><b>${s.pattern.join(', ')}</b></td>
-                    <td>${s.scrambled.join(', ')}</td>
-                    <td>
-                        <button class="action-btn" onclick='editEntry(${JSON.stringify(s)})' style="background: #ffd166; color: #333;">Edit</button>
-                        <button class="action-btn" onclick="deleteEntry(${s.id})" style="background: #ef476f;">Del</button>
+                    <td data-label="ID">${s.id}</td>
+                    <td data-label="Goal"><b>${s.pattern.join(', ')}</b></td>
+                    <td data-label="Scramble">${s.scrambled.join(', ')}</td>
+                    <td data-label="Actions">
+                        <button onclick='editEntry(${JSON.stringify(s)})' style="background: #ffd166; color: #333; padding: 5px 10px; border-radius: 5px; border:none;">Edit</button>
+                        <button onclick="deleteEntry(${s.id})" style="background: #ef476f; color: #fff; padding: 5px 10px; border-radius: 5px; border:none;">Del</button>
                     </td>
                 </tr>
             `).join('');
@@ -112,51 +91,37 @@
 
         function editEntry(s) {
             isEdit = true;
-            document.getElementById('form-title').innerText = "Update Sequence #" + s.id;
+            document.getElementById('form-title').innerText = "Update #" + s.id;
             document.getElementById('id').value = s.id;
-            document.getElementById('id').disabled = true; // Lock ID during edit
+            document.getElementById('id').disabled = true;
             document.getElementById('pattern').value = s.pattern.join(', ');
             document.getElementById('scrambled').value = s.scrambled.join(', ');
-            
             document.getElementById('save-btn').innerText = "Update";
             document.getElementById('cancel-btn').style.display = "inline-block";
         }
 
         function resetForm() {
             isEdit = false;
+            document.getElementById('id').disabled = false;
             document.getElementById('form-title').innerText = "Add New Sequence";
             document.getElementById('id').value = "";
-            document.getElementById('id').disabled = false;
             document.getElementById('pattern').value = "";
             document.getElementById('scrambled').value = "";
-            document.getElementById('save-btn').innerText = "Save Sequence";
+            document.getElementById('save-btn').innerText = "Save";
             document.getElementById('cancel-btn').style.display = "none";
         }
 
         async function save() {
             const id = document.getElementById('id').value;
             const pattern = document.getElementById('pattern').value.split(',').map(n => parseInt(n.trim()));
-            let scrambledVal = document.getElementById('scrambled').value;
-            
-            // Logic to handle manual vs auto scrambling
-            let scrambled;
-            if (scrambledVal.trim() !== "") {
-                scrambled = scrambledVal.split(',').map(n => parseInt(n.trim()));
-            } else {
-                scrambled = [...pattern].sort(() => Math.random() - 0.5);
-            }
+            const scrambled = document.getElementById('scrambled').value.split(',').map(n => parseInt(n.trim()));
 
-            const payload = {
-                id: parseInt(id),
-                pattern: pattern,
-                scrambled: scrambled
-            };
-
+            const payload = { id: parseInt(id), pattern, scrambled };
             const method = isEdit ? 'PUT' : 'POST';
             const url = isEdit ? `/api/sequences/${id}` : '/api/sequences';
 
             await fetch(url, {
-                method: method,
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
@@ -166,13 +131,11 @@
         }
 
         async function deleteEntry(id) {
-            if (confirm("Are you sure you want to delete this level?")) {
+            if (confirm("Delete level?")) {
                 await fetch(`/api/sequences/${id}`, { method: 'DELETE' });
                 load();
             }
         }
-
-        // Initial load
         load();
     </script>
 </body>

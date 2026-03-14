@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sequence Sorter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='arrange.css') }}">
+</head>
+<body>
+    <div class="card">
+        <h1 style="color: #073b4c;">Sequence Sorter</h1>
+        <div id="game-area">
+            <p>Drag the cards to put the numbers in the correct order!</p>
+            <div id="display" class="sequence-container"></div>
+            <h2 id="msg"></h2>
+        </div>
+        <div id="restart-screen" style="display: none;">
+            <h2>🏆 Mission Complete!</h2>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+        <br><a href="/admin" style="color:#aaa; font-size:0.8rem; text-decoration:none;">Admin Dashboard</a>
+    </div>
+    <script src="{{ url_for('static', filename='arrange.js') }}"></script>
+</body>
+</html>
